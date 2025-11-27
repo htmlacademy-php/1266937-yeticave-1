@@ -1,9 +1,36 @@
 <?php
-$is_auth = rand(0, 1);
+require_once('./helpers.php');
 
-$user_name = 'Angelina';
+$isAuth = rand(0, 1);
 
-$categories = ['Доски и лыжи', 'Крепления', 'Ботинки', 'Одежда', 'Инструменты', 'Разное'];
+$userName = 'Angelina';
+
+$categories = [
+    [
+        'title' => 'Доски и лыжи', 
+        'mod' => 'boards'
+    ],
+    [
+        'title' => 'Крепления', 
+        'mod' => 'boards'
+    ],
+    [
+        'title' => 'Ботинки', 
+        'mod' => 'boots'
+    ],
+    [
+        'title' => 'Одежда', 
+        'mod' => 'clothing'
+    ],
+    [
+        'title' => 'Инструменты', 
+        'mod' => 'tools'
+    ],
+    [
+        'title' => 'Разное', 
+        'mod' => 'other'
+    ]
+];
 
 $lots = [
     [
@@ -41,7 +68,7 @@ $lots = [
         'category' => 'Разное',
         'price' => '5400',
         'url' => 'img/lot-6.jpg'
-    ],
+    ]
 ]
 
 ?>
@@ -70,9 +97,9 @@ $lots = [
         <a class="main-header__add-lot button" href="pages/add-lot.html">Добавить лот</a>
 
         <nav class="user-menu">        
-        <?php if ($is_auth) : ?>
+        <?php if ($isAuth === 1) : ?>
             <div class="user-menu__logged">
-                <p><?=$user_name?></p>
+                <p><?=$userName?></p>
                 <a class="user-menu__bets" href="pages/my-bets.html">Мои ставки</a>
                 <a class="user-menu__logout" href="#">Выход</a>
             </div>
@@ -96,9 +123,9 @@ $lots = [
         <h2 class="promo__title">Нужен стафф для катки?</h2>
         <p class="promo__text">На нашем интернет-аукционе ты найдёшь самое эксклюзивное сноубордическое и горнолыжное снаряжение.</p>
         <ul class="promo__list">
-        <?php foreach ($categories as $value): ?>
-            <li class="promo__item promo__item--boards">
-                <a class="promo__link" href="pages/all-lots.html"><?=$value?></a>
+        <?php foreach ($categories as $category): ?>
+            <li class="promo__item promo__item--<?=$category['mod']; ?>">
+                <a class="promo__link" href="pages/all-lots.html"><?=$category['title']; ?></a>
             </li>
         <?php endforeach; ?>
         </ul>
@@ -108,18 +135,18 @@ $lots = [
             <h2>Открытые лоты</h2>
         </div>
         <ul class="lots__list">
-        <?php foreach ($lots as $key => $value): ?>
+        <?php foreach ($lots as $lot): ?>
             <li class="lots__item lot">
                 <div class="lot__image">
-                    <img src="<?=$value['url']; ?>" width="350" height="260" alt="<?=$value['title']; ?>">
+                    <img src="<?=$lot['url']; ?>" width="350" height="260" alt="<?=$lot['title']; ?>">
                 </div>
                 <div class="lot__info">
-                    <span class="lot__category"><?=$value['category'];?></span>
-                    <h3 class="lot__title"><a class="text-link" href="pages/lot.html"><?=$val['title'];?></a></h3>
+                    <span class="lot__category"><?=$lot['category']; ?></span>
+                    <h3 class="lot__title"><a class="text-link" href="pages/lot.html"><?=$lot['title']; ?></a></h3>
                     <div class="lot__state">
                         <div class="lot__rate">
-                            <span class="lot__amount"><?=$val['price'];?></span>
-                            <span class="lot__cost">цена<b class="rub"><?=$val['price'];?></b></span>
+                            <span class="lot__amount">Стартовая цена</span>
+                            <span class="lot__cost"><?=formatPrice($lot['price']); ?></span>
                         </div>
                         <div class="lot__timer timer">
                             12:23
@@ -136,9 +163,9 @@ $lots = [
 <footer class="main-footer">
     <nav class="nav">
         <ul class="nav__list container">
-        <?php foreach ($categories as $value): ?>
+        <?php foreach ($categories as $category): ?>
             <li class="nav__item">
-                <a href="pages/all-lots.html"><?=$value?></a>
+                <a href="pages/all-lots.html"><?=$category['title']; ?></a>
             </li>
         <?php endforeach; ?>
         </ul>

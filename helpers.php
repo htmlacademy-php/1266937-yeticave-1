@@ -143,4 +143,12 @@ function include_template($name, array $data = []) {
     return $result;
 }
 
+/**
+ * Форматирует цену в рублях с разделителями разрядов
+ * @param int $price Целое число
+ * @return string Отформатированная цена со знаком рубля
+ */
 
+function formatPrice(int $price): string {
+    return number_format($price, 0, '', ' ').'<b class="rub"></b>';
+}
