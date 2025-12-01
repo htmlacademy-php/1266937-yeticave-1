@@ -151,3 +151,31 @@ function formatPrice(int $price): string
 {
     return number_format($price, 0, '', ' ') . '<b class="rub"></b>';
 }
+
+/**
+ *  Возвращает количество целых часов и остатка минут до даты в будущем
+ *
+ * @param string $date Дата в формате ГГГГ-ММ-ДД
+ * @return array Массив: первый элемент - целое количество часов до даты, второй - остаток в минутах
+ */
+function getTimeToExpiry(string $date): array
+{
+    $expiryDate = date_create($date);
+    $currentDate = date_create("now");
+
+    if ($currentDate > $expiryDate) {
+        return [0, 0];
+    }
+
+    $interval = date_diff($currentDate, $expiryDate);
+
+    $days = $interval->d;
+    $hours = $interval->h;
+    $minutes = $interval->i;
+
+    if ($days !== 0) {
+        $hours += $days * 24;
+    }
+
+    return [$hours, $minutes];
+}
