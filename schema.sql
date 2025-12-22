@@ -1,0 +1,49 @@
+DROP DATABASE IF EXISTS yeticave;
+
+CREATE DATABASE yeticave DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;
+
+USE yeticave;
+
+CREATE TABLE categories (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(50) NOT NULL,
+  symbol_code VARCHAR(50) NOT NULL,
+  UNIQUE INDEX idx_symbol_code (symbol_code)
+);
+
+CREATE TABLE users (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  email VARCHAR(255) NOT NULL,
+  username VARCHAR(50) NOT NULL,
+  password_hash CHAR(60) NOT NULL,
+  contacts TEXT NOT NULL,
+  UNIQUE INDEX idx_email (email)
+);
+
+CREATE TABLE lots (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  title VARCHAR(80) NOT NULL,
+  description TEXT NOT NULL,
+  img_url VARCHAR(2083) NOT NULL,
+  price INT UNSIGNED NOT NULL,
+  expiry_at DATETIME NOT NULL,
+  step INT UNSIGNED NOT NULL,
+  creator_id INT UNSIGNED NOT NULL,
+  winner_id INT UNSIGNED NOT NULL,
+  category_id INT UNSIGNED NOT NULL,
+  FOREIGN KEY (creator_id) REFERENCES users(id),
+  FOREIGN KEY (winner_id) REFERENCES users(id),
+  FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+CREATE TABLE bids (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  price INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  lot_id INT UNSIGNED NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (lot_id) REFERENCES lots(id)
+);
