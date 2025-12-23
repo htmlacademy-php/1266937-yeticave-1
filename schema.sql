@@ -31,7 +31,7 @@ CREATE TABLE lots (
   expiry_at DATETIME NOT NULL,
   step INT UNSIGNED NOT NULL,
   creator_id INT UNSIGNED NOT NULL,
-  winner_id INT UNSIGNED NOT NULL,
+  winner_id INT UNSIGNED NULL,
   category_id INT UNSIGNED NOT NULL,
   FOREIGN KEY (creator_id) REFERENCES users(id),
   FOREIGN KEY (winner_id) REFERENCES users(id),
