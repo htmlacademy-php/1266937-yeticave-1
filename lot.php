@@ -12,13 +12,26 @@ $isAuth = rand(0, 1);
 $userName = 'Angelina';
 
 $categories = getCategories($db);
-$lots = getLots($db);
+
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+if (!$id || $id <= 0) {
+    http_response_code(404);
+    exit('Некорректный идентификатор лота');
+}
+
+$lot = getLotById($db, $id);
+
+if ($lot === null) {
+    http_response_code(404);
+    die("Лот не найден");
+}
 
 $pageContent = includeTemplate(
-    'main.php',
+    'lot.php',
     [
-        'categories' => $categories,
-        'lots' => $lots
+        'lot' => $lot,
+        'categories' => $categories
     ]
 );
 
@@ -29,7 +42,7 @@ $layoutContent = includeTemplate(
         'categories' => $categories,
         'isAuth' => $isAuth,
         'userName' => $userName,
-        'title' => 'YetiCave - Главная страница'
+        'title' => 'YetiCave - ' . $lot['title']
     ]
 );
 

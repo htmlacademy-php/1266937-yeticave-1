@@ -1,6 +1,59 @@
 <?php
 
 /**
+ * Создает подготовленное выражение на основе готового SQL запроса и переданных данных
+ *
+ * @param $link mysqli Ресурс соединения
+ * @param $sql string SQL запрос с плейсхолдерами вместо значений
+ * @param array $data Данные для вставки на место плейсхолдеров
+ *
+ * @return mysqli_stmt Подготовленное выражение
+ */
+function dbGetPrepareStmt(mysqli $link, string $sql, array $data = []): mysqli_stmt
+{
+    $stmt = mysqli_prepare($link, $sql);
+
+    if ($stmt === false) {
+        $errorMsg = 'Не удалось инициализировать подготовленное выражение: ' . mysqli_error($link);
+        die($errorMsg);
+    }
+
+    if ($data) {
+        $types = '';
+        $stmt_data = [];
+
+        foreach ($data as $value) {
+            $type = 's';
+
+            if (is_int($value)) {
+                $type = 'i';
+            } else if (is_string($value)) {
+                $type = 's';
+            } else if (is_double($value)) {
+                $type = 'd';
+            }
+
+            if ($type) {
+                $types .= $type;
+                $stmt_data[] = $value;
+            }
+        }
+
+        $values = array_merge([$stmt, $types], $stmt_data);
+
+        $func = 'mysqli_stmt_bind_param';
+        $func(...$values);
+
+        if (mysqli_errno($link) > 0) {
+            $errorMsg = 'Не удалось связать подготовленное выражение с параметрами: ' . mysqli_error($link);
+            die($errorMsg);
+        }
+    }
+
+    return $stmt;
+}
+
+/**
  * Устанавливает новое соединение с базой данных
  * @param array $config_db Массив с ключами: hostname, username, password, database
  * @throws Exception При неудачной попытке подключения
@@ -30,7 +83,7 @@ function connectDB(array $config_db): mysqli
  * Получает список всех категорий из базы данных
  * @param mysqli $link Ресурс соединения
  * @throws mysqli_sql_exception Если ошибка в запросе
- * @return array Возвращает массив всех категорий или пустой массив при ошибке
+ * return array<int, array{id: int, title: string, symbol_code: string} Возвращает массив всех категорий или пустой массив при ошибке
  */
 function getCategories(mysqli $link): array
 {
@@ -82,54 +135,39 @@ function getLots(mysqli $link): array
 }
 
 /**
- * Создает подготовленное выражение на основе готового SQL запроса и переданных данных
- *
- * @param $link mysqli Ресурс соединения
- * @param $sql string SQL запрос с плейсхолдерами вместо значений
- * @param array $data Данные для вставки на место плейсхолдеров
- *
- * @return mysqli_stmt Подготовленное выражение
+ * Получает данные одного лота по его id
+ * @param mysqli $link Ресурс соединения
+ * @param int $id id лота
+ * @throws mysqli_sql_exception Если ошибка в запросе
+ * @return array Возвращает лот или null при ошибке
  */
-function dbGetPrepareStmt(mysqli $link, string $sql, array $data = []): mysqli_stmt
+function getLotById(mysqli $link, int $id): ?array
 {
-    $stmt = mysqli_prepare($link, $sql);
+    try {
+        $sql = 'SELECT
+                    l.id,
+                    l.title,
+                    l.description,
+                    l.img_url AS url,
+                    l.price,
+                    l.expiry_at AS expiry_date,
+                    c.title AS category,
+                    COALESCE(MAX(b.price), l.price) AS max_price
+                FROM lots l
+                JOIN categories c ON l.category_id = c.id
+                LEFT JOIN bids b ON l.id = b.lot_id
+                WHERE l.id = ?
+                GROUP BY l.id, c.title';
 
-    if ($stmt === false) {
-        $errorMsg = 'Не удалось инициализировать подготовленное выражение: ' . mysqli_error($link);
-        die($errorMsg);
+        $stmt = dbGetPrepareStmt($link, $sql, [$id]);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $lot = mysqli_fetch_assoc($result);
+
+        return $lot ?: null;
+
+    } catch (mysqli_sql_exception $e) {
+        error_log('Ошибка при получении лота по id' . $e->getMessage());
+        return null;
     }
-
-    if ($data) {
-        $types = '';
-        $stmt_data = [];
-
-        foreach ($data as $value) {
-            $type = 's';
-
-            if (is_int($value)) {
-                $type = 'i';
-            } else if (is_string($value)) {
-                $type = 's';
-            } else if (is_double($value)) {
-                $type = 'd';
-            }
-
-            if ($type) {
-                $types .= $type;
-                $stmt_data[] = $value;
-            }
-        }
-
-        $values = array_merge([$stmt, $types], $stmt_data);
-
-        $func = 'mysqli_stmt_bind_param';
-        $func(...$values);
-
-        if (mysqli_errno($link) > 0) {
-            $errorMsg = 'Не удалось связать подготовленное выражение с параметрами: ' . mysqli_error($link);
-            die($errorMsg);
-        }
-    }
-
-    return $stmt;
 }
