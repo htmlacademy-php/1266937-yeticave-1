@@ -83,7 +83,7 @@ function connectDB(array $config_db): mysqli
  * Получает список всех категорий из базы данных
  * @param mysqli $link Ресурс соединения
  * @throws mysqli_sql_exception Если ошибка в запросе
- * return array<int, array{id: int, title: string, symbol_code: string} Возвращает массив всех категорий или пустой массив при ошибке
+ * return array Возвращает массив всех категорий или пустой массив при ошибке
  */
 function getCategories(mysqli $link): array
 {
@@ -170,4 +170,45 @@ function getLotById(mysqli $link, int $id): ?array
         error_log('Ошибка при получении лота по id' . $e->getMessage());
         return null;
     }
+}
+
+/**
+ * Добавляет в базу данных новый лот
+ * @param mysqli $link Ресурс соединения
+ * @param array $data
+ * @param int $userId
+ * @throws Exception
+ * @return int
+ */
+function addLot(mysqli $link, array $data, int $userId): int
+{
+    $sql = "INSERT INTO lots(created_at, title, description, img_url, price, step, expiry_at, creator_id, category_id)
+        VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    $data = [
+        $data['lot-name'],
+        $data['message'],
+        $data['lot-img'],
+        $data['lot-rate'],
+        $data['lot-step'],
+        $data['lot-date'],
+        $userId,
+        $data['category']
+    ];
+
+    try {
+        $stmt = dbGetPrepareStmt($link, $sql, $data);
+        $result = mysqli_stmt_execute($stmt);
+
+        if (!$result) {
+            throw new Exception(mysqli_error($link));
+        }
+
+        return mysqli_insert_id($link);
+
+    } catch (Exception $e) {
+        error_log('Ошибка БД при добавлении лота: ' . $e->getMessage());
+        throw new Exception('Ошибка при добавлении лота');
+    }
+
 }
