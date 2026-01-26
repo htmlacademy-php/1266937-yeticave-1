@@ -1,8 +1,7 @@
 <?php
 
 /**
- * @var int $isAuth
- * @var string $userName
+ * @var array $user
  * @var mysqli $db
  */
 
@@ -24,8 +23,7 @@ $layoutContent = includeTemplate(
     [
         'content' => $pageContent,
         'categories' => $categories,
-        'isAuth' => $isAuth,
-        'userName' => $userName,
+        'user' => $user,
         'title' => 'YetiCave - Главная страница'
     ]
 );

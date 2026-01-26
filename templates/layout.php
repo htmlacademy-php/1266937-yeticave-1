@@ -36,11 +36,11 @@
                     <a class="main-header__add-lot button" href="/add.php">Добавить лот</a>
 
                     <nav class="user-menu">
-                        <?php if ($isAuth === 1): ?>
+                        <?php if (isset($user)): ?>
                             <div class="user-menu__logged">
-                                <p><?= $userName ?></p>
+                                <p><?= $user['username']; ?></p>
                                 <a class="user-menu__bets" href="pages/my-bets.html">Мои ставки</a>
-                                <a class="user-menu__logout" href="#">Выход</a>
+                                <a class="user-menu__logout" href="/logout.php">Выход</a>
                             </div>
                         <?php else: ?>
                             <ul class="user-menu__list">
@@ -48,7 +48,7 @@
                                     <a href="/sign-up.php">Регистрация</a>
                                 </li>
                                 <li class="user-menu__item">
-                                    <a href="#">Вход</a>
+                                    <a href="/login.php">Вход</a>
                                 </li>
                             </ul>
                         <?php endif; ?>
@@ -114,7 +114,7 @@
                         </svg>
                     </a>
                 </div>
-                <a class="main-footer__add-lot button" href="pages/add-lot.html">Добавить лот</a>
+                <a class="main-footer__add-lot button" href="/add.php">Добавить лот</a>
                 <div class="main-footer__developed-by">
                     <span class="visually-hidden">Разработано:</span>
                     <a class="logo-academy" href="https://htmlacademy.ru/intensive/php">

@@ -94,7 +94,7 @@ function validateImage(array $file, array $fileTypes): string|null
     $mimeType = mime_content_type($file['tmp_name']);
 
     if (!in_array($mimeType, $fileTypes)) {
-        $typeList = implode(', ', $fileTypes);
+        $typeList = str_replace('image/', '', implode(', ', $fileTypes));
 
         return "Допустимые форматы изображения: {$typeList}";
     }
@@ -102,6 +102,8 @@ function validateImage(array $file, array $fileTypes): string|null
     return null;
 
 }
+
+// str_replace('image/', '', implode(', ', $fileTypes))
 
 /**
  * Валидирует данные формы добавления лота
@@ -151,7 +153,7 @@ function validateLotForm(array $postData, array $fileData): array
             return validateDate($value);
         },
         'lot-img' => function ($file) {
-            return validateImage($file, ['jpeg', 'png']);
+            return validateImage($file, ['image/jpeg', 'image/png']);
         }
     ];
 
@@ -223,7 +225,7 @@ function validateSignUpForm(array $postData): array
 
     $rules = [
         'email' => function ($value) {
-            return validateEmailFormat($value) ?? validateLength($value, 8, 72);
+            return validateEmailFormat($value);
         },
         'password' => function ($value) {
             return validateLength($value, 8, 72);
@@ -274,4 +276,27 @@ function validateEmailUnique(mysqli $link, string $email): string|null
     }
 
     return null;
+}
+
+/**
+ * Валидирует данные формы входа
+ * @param array $postData Данные из массива $_POST
+ * @return string[] Список ошибок
+ */
+function validateLoginForm(array $postData): array
+{
+    $errorMessages = [
+        'email' => 'Введите e-mail',
+        'password' => 'Введите пароль'
+    ];
+
+    $errors = [];
+
+    foreach ($errorMessages as $key => $message) {
+        if (empty($postData[$key])) {
+            $errors[$key] = $message;
+        }
+    }
+
+    return $errors;
 }

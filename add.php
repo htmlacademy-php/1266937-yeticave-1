@@ -1,14 +1,23 @@
 <?php
 
 /**
- * @var int $isAuth
- * @var string $userName
+ * @var array user
  * @var mysqli $db
  */
 
 require_once __DIR__ . '/init.php';
 
 $categories = getCategories($db);
+
+if (!$user) {
+    http_response_code(403);
+
+    // $pageContent = includeTemplate('error.php', [
+    //     'error' => 'Ошибка 403. Доступ запрещен'
+    // ]);
+
+    exit();
+}
 
 $errors = [];
 $postData = $_POST;
@@ -26,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (move_uploaded_file($tmpName, __DIR__ . '/' . $filePath)) {
             $postData['lot-img'] = $filePath;
-            // Временный id
-            $userId = 1;
+
+            $userId = $user['id'];
 
             try {
                 $id = addLot($db, $postData, $userId);
@@ -58,8 +67,7 @@ $layoutContent = includeTemplate(
     [
         'content' => $pageContent,
         'categories' => $categories,
-        'isAuth' => $isAuth,
-        'userName' => $userName,
+        'user' => $user,
         'title' => 'YetiCave - Добавление лота'
     ]
 );

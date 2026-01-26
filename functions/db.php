@@ -242,3 +242,39 @@ function addNewUser(mysqli $link, array $data): bool
         return false;
     }
 }
+
+/**
+ * Проверяет учетные данные пользователя - email, пароль
+ * @param mysqli $link Ресурс соединения
+ * @param string $email Email пользователя
+ * @param string $password Пароль пользователя
+ * @throws Exception Если произошла ошибка
+ * @return array|null Данные пользователя в случае успеха, или null при ошибке
+ */
+function authenticateUser(mysqli $link, string $email, string $password): array|null
+{
+    try {
+        $sql = 'SELECT id, username, password_hash FROM users WHERE email = ?';
+        $stmt = dbGetPrepareStmt($link, $sql, [$email]);
+
+        if (!mysqli_stmt_execute($stmt)) {
+            throw new Exception("Не удалось выполнить запрос к БД");
+        }
+
+        $result = mysqli_stmt_get_result($stmt);
+
+        $userData = $result ? mysqli_fetch_array($result, MYSQLI_ASSOC) : null;
+
+        if ($userData && password_verify($password, $userData['password_hash'])) {
+            unset($userData['password_hash']);
+            return $userData;
+        }
+
+    } catch (Exception $e) {
+        error_log("Ошибка аутентификации: " . $e->getMessage());
+        throw $e;
+    }
+
+    return null;
+}
+
