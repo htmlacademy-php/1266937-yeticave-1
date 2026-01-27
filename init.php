@@ -17,6 +17,8 @@ if (!file_exists(__DIR__ . '/config.php')) {
 
 $config = require_once __DIR__ . '/config.php';
 
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 $db = connectDB($config['db']);
 
 $user = $_SESSION['user'] ?? null;

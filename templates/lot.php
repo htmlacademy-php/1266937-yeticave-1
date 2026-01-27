@@ -1,7 +1,7 @@
 <?php
 
 /**
- *var array $lot
+ * var array $lot
  */
 
 ?>

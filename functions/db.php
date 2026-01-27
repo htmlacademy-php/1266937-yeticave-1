@@ -119,8 +119,7 @@ function getLots(mysqli $link): array
                 FROM lots l
                 JOIN categories c ON l.category_id = c.id
                 WHERE l.expiry_at > NOW()
-                ORDER BY l.created_at DESC
-                LIMIT 6';
+                ORDER BY l.created_at DESC';
 
 
         $result = mysqli_query($link, $sql);
@@ -276,5 +275,45 @@ function authenticateUser(mysqli $link, string $email, string $password): array|
     }
 
     return null;
+}
+
+/**
+ * Выполняет полнотекстовый поиск по открытым лотам
+ * @param mysqli $link Ресурс соединения
+ * @param string $search Строка поискового запроса
+ * @return array Список найденных лотов
+ */
+function getLotsViaSearch(mysqli $link, string $search): array
+{
+    $sql = 'SELECT
+                l.id,
+                l.title,
+                l.price,
+                l.img_url AS url,
+                l.expiry_at AS expiry_date,
+                c.title AS category
+            FROM lots l
+            JOIN categories c ON l.category_id = c.id
+            WHERE MATCH(l.title, l.description) AGAINST(?)
+            AND l.expiry_at > NOW()
+            ORDER BY created_at DESC
+            LIMIT 9';
+
+
+    try {
+        $stmt = dbGetPrepareStmt($link, $sql, [$search]);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        if ($result) {
+            return mysqli_fetch_all($result, MYSQLI_ASSOC);
+        }
+
+    } catch (Exception $e) {
+        error_log('Ошибка поиска: ' . $e->getMessage());
+        return [];
+    }
+
+    return [];
 }
 
