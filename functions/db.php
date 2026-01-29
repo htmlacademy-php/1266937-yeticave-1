@@ -278,17 +278,32 @@ function authenticateUser(mysqli $link, string $email, string $password): array|
 }
 
 /**
- * Получает количество элементов, соответствующих поисковому запросу
+ * Получает количество лотов, соответствующих поисковому запросу / категории
  * @param mysqli $link Ресурс соединения
- * @param string $search Строка поискового запроса
+ * @param string|null $search Строка поискового запроса, если есть
+ * @param int|null $categoryId id категории, если есть
  * @throws Exception Если произошла ошибка
- * @return int Количество найденных элементов
+ * @return int Количество найденных лотов
  */
-function getItemsCount(mysqli $link, string $search): int
+function getItemsCount(mysqli $link, ?string $search = null, ?int $categoryId = null): int
 {
+    $where = 'WHERE expiry_at > NOW()';
+    $params = [];
+
+    if ($search) {
+        $where .= ' AND MATCH(title, description) AGAINST(?)';
+        $params[] = $search;
+    }
+
+    if ($categoryId) {
+        $where .= ' AND category_id = ?';
+        $params[] = $categoryId;
+    }
+
+    $sql = "SELECT COUNT(*) as cnt FROM lots $where";
+
     try {
-        $sql = 'SELECT COUNT(*) as cnt FROM lots WHERE MATCH(title, description) AGAINST(?)';
-        $stmt = dbGetPrepareStmt($link, $sql, [$search]);
+        $stmt = dbGetPrepareStmt($link, $sql, $params);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
 
@@ -300,10 +315,9 @@ function getItemsCount(mysqli $link, string $search): int
         return (int) ($itemsCount['cnt'] ?? 0);
 
     } catch (Exception $e) {
-        error_log("Ошибка при получении количества элементов из поискового запроса: " . $e->getMessage());
+        error_log("Ошибка при получении количества лотов: " . $e->getMessage());
         return 0;
     }
-
 }
 
 
@@ -316,7 +330,7 @@ function getItemsCount(mysqli $link, string $search): int
  * @throws Exception Если произошла ошибка
  * @return array Список найденных лотов
  */
-function getLotsViaSearch(mysqli $link, string $search, int $pageItems, int $offset): array
+function findLotsBySearch(mysqli $link, string $search, int $pageItems, int $offset): array
 {
     $sql = 'SELECT
                 l.id,
@@ -330,11 +344,10 @@ function getLotsViaSearch(mysqli $link, string $search, int $pageItems, int $off
             WHERE MATCH(l.title, l.description) AGAINST(?)
             AND l.expiry_at > NOW()
             ORDER BY created_at DESC
-            LIMIT ' . $pageItems . ' OFFSET ' . $offset;
-
+            LIMIT ? OFFSET ?';
 
     try {
-        $stmt = dbGetPrepareStmt($link, $sql, [$search]);
+        $stmt = dbGetPrepareStmt($link, $sql, [$search, $pageItems, $offset]);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
 
@@ -346,3 +359,31 @@ function getLotsViaSearch(mysqli $link, string $search, int $pageItems, int $off
     }
 }
 
+function findLotsByCategory(mysqli $link, int $category_id, int $limit, int $offset): array
+{
+    $sql = 'SELECT
+                l.id,
+                l.title,
+                l.price,
+                l.img_url AS url,
+                l.expiry_at AS expiry_date,
+                c.title AS category
+                FROM lots l
+                JOIN categories c ON l.category_id = c.id
+                WHERE category_id = ?
+                AND expiry_at > NOW()
+                ORDER BY l.created_at DESC
+                LIMIT ? OFFSET ?';
+
+    try {
+        $stmt = dbGetPrepareStmt($link, $sql, [$category_id, $limit, $offset]);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        return $result ? mysqli_fetch_all($result, MYSQLI_ASSOC) : [];
+
+    } catch (Exception $e) {
+        error_log('Ошибка получения лотов по категории: ' . $e->getMessage());
+        return [];
+    }
+}

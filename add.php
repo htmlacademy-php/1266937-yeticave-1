@@ -47,10 +47,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$navContent = includeTemplate(
+    'nav.php',
+    [
+        'categories' => $categories
+    ]
+);
 
 $pageContent = includeTemplate(
     'add.php',
     [
+        'nav' => $navContent,
         'categories' => $categories,
         'errors' => $errors,
         'postData' => $postData
@@ -60,6 +67,7 @@ $pageContent = includeTemplate(
 $layoutContent = includeTemplate(
     'layout.php',
     [
+        'nav' => $navContent,
         'content' => $pageContent,
         'categories' => $categories,
         'user' => $user,

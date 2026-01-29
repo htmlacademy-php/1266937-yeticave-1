@@ -12,6 +12,13 @@ $categories = getCategories($db);
 $errors = [];
 $postData = $_POST;
 
+$navContent = includeTemplate(
+    'nav.php',
+    [
+        'categories' => $categories
+    ]
+);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors = validateLoginForm($postData);
 
@@ -31,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pageContent = includeTemplate(
         'login.php',
         [
+            'nav' => $navContent,
             'categories' => $categories,
             'postData' => $postData,
             'errors' => $errors
@@ -44,13 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $pageContent = includeTemplate('login.php', [
-        'categories' => $categories,
+        'nav' => $navContent
     ]);
 }
 
 $layoutContent = includeTemplate(
     'layout.php',
     [
+        'nav' => $navContent,
         'content' => $pageContent,
         'categories' => $categories,
         'user' => $user,

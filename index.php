@@ -10,17 +10,24 @@ require_once __DIR__ . '/init.php';
 $categories = getCategories($db);
 $lots = getLots($db);
 
+$navContent = includeTemplate(
+    'nav.php',
+    ['categories' => $categories]
+);
+
 $pageContent = includeTemplate(
     'main.php',
     [
+        'nav' => $navContent,
         'categories' => $categories,
-        'lots' => $lots
+        'lots' => $lots,
     ]
 );
 
 $layoutContent = includeTemplate(
     'layout.php',
     [
+        'nav' => $navContent,
         'content' => $pageContent,
         'categories' => $categories,
         'user' => $user,

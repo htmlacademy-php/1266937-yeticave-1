@@ -1,23 +1,15 @@
 <?php
 
 /**
- * var array $lot
+ * @var array $lot
+ * @var array $categories
+ * @var string $navContent
  */
 
 ?>
 
 <main>
-    <nav class="nav">
-        <ul class="nav__list container">
-            <?php foreach ($categories as $category): ?>
-                <li class="nav__item">
-                    <a href="pages/all-lots.html">
-                        <?= $category['title']; ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </nav>
+    <?= $nav; ?>
     <section class="lot-item container">
         <h2><?= htmlspecialchars($lot['title']); ?></h2>
         <div class="lot-item__content">

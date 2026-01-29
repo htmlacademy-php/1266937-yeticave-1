@@ -40,10 +40,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$navContent = includeTemplate(
+    'nav.php',
+    [
+        'categories' => $categories
+    ]
+);
+
 $pageContent = includeTemplate(
     'sign-up.php',
     [
-        'categories' => $categories,
+        'nav' => $navContent,
         'errors' => $errors,
         'postData' => $postData
     ]
@@ -52,6 +59,7 @@ $pageContent = includeTemplate(
 $layoutContent = includeTemplate(
     'layout.php',
     [
+        'nav' => $navContent,
         'content' => $pageContent,
         'categories' => $categories,
         'user' => $user,

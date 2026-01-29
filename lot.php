@@ -23,11 +23,18 @@ if ($lot === null) {
     die("Лот не найден");
 }
 
+$navContent = includeTemplate(
+    'nav.php',
+    [
+        'categories' => $categories
+    ]
+);
+
 $pageContent = includeTemplate(
     'lot.php',
     [
+        'nav' => $navContent,
         'lot' => $lot,
-        'categories' => $categories,
         'user' => $user
     ]
 );
@@ -36,6 +43,7 @@ $layoutContent = includeTemplate(
     'layout.php',
     [
         'content' => $pageContent,
+        'nav' => $navContent,
         'categories' => $categories,
         'user' => $user,
         'title' => 'YetiCave - ' . $lot['title']
