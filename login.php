@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'errors' => $errors
         ]
     );
+
 } else {
 
     if ($user) {
@@ -52,7 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $pageContent = includeTemplate('login.php', [
-        'nav' => $navContent
+        'nav' => $navContent,
+        'categories' => $categories,
     ]);
 }
 

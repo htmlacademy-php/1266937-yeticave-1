@@ -55,6 +55,7 @@ function dbGetPrepareStmt(mysqli $link, string $sql, array $data = []): mysqli_s
 
 /**
  * Устанавливает новое соединение с базой данных
+ *
  * @param array $config_db Массив с ключами: hostname, username, password, database
  * @throws Exception При неудачной попытке подключения
  * @return mysqli Ресурс соединения
@@ -81,6 +82,7 @@ function connectDB(array $config_db): mysqli
 
 /**
  * Получает список всех категорий из базы данных
+ *
  * @param mysqli $link Ресурс соединения
  * @throws mysqli_sql_exception Если ошибка в запросе
  * @return array Возвращает массив всех категорий или пустой массив при ошибке
@@ -102,6 +104,7 @@ function getCategories(mysqli $link): array
 
 /**
  * Получает список последних 6 активных лотов, отсортированных по убыванию
+ *
  * @param mysqli $link Ресурс соединения
  * @throws mysqli_sql_exception Если ошибка в запросе
  * @return array Возвращает массив лотов или пустой массив при ошибке
@@ -135,6 +138,7 @@ function getLots(mysqli $link): array
 
 /**
  * Получает данные одного лота по его id
+ *
  * @param mysqli $link Ресурс соединения
  * @param int $id id лота
  * @throws mysqli_sql_exception Если ошибка в запросе
@@ -150,6 +154,7 @@ function getLotById(mysqli $link, int $id): ?array
                     l.img_url AS url,
                     l.price,
                     l.expiry_at AS expiry_date,
+                    l.step,
                     c.title AS category,
                     COALESCE(MAX(b.price), l.price) AS max_price
                 FROM lots l
@@ -173,6 +178,7 @@ function getLotById(mysqli $link, int $id): ?array
 
 /**
  * Добавляет в базу данных новый лот
+ *
  * @param mysqli $link Ресурс соединения
  * @param array $data Массив данных
  * @param int $userId
@@ -214,6 +220,7 @@ function addLot(mysqli $link, array $data, int $userId): int
 
 /**
  * Добавляет нового пользователя в базу данных
+ *
  * @param mysqli $link Ресурс соединения
  * @param array $data Массив данных
  * @return bool При успехе true, иначе false
@@ -244,6 +251,7 @@ function addNewUser(mysqli $link, array $data): bool
 
 /**
  * Проверяет учетные данные пользователя - email, пароль
+ *
  * @param mysqli $link Ресурс соединения
  * @param string $email Email пользователя
  * @param string $password Пароль пользователя
@@ -269,7 +277,7 @@ function authenticateUser(mysqli $link, string $email, string $password): array|
             return $userData;
         }
 
-    } catch (Exception $e) {
+    } catch (mysqli_sql_exception $e) {
         error_log("Ошибка аутентификации: " . $e->getMessage());
         throw $e;
     }
@@ -279,6 +287,7 @@ function authenticateUser(mysqli $link, string $email, string $password): array|
 
 /**
  * Получает количество лотов, соответствующих поисковому запросу / категории
+ *
  * @param mysqli $link Ресурс соединения
  * @param string|null $search Строка поискового запроса, если есть
  * @param int|null $categoryId id категории, если есть
@@ -314,7 +323,7 @@ function getItemsCount(mysqli $link, ?string $search = null, ?int $categoryId = 
 
         return (int) ($itemsCount['cnt'] ?? 0);
 
-    } catch (Exception $e) {
+    } catch (mysqli_sql_exception $e) {
         error_log("Ошибка при получении количества лотов: " . $e->getMessage());
         return 0;
     }
@@ -323,12 +332,13 @@ function getItemsCount(mysqli $link, ?string $search = null, ?int $categoryId = 
 
 /**
  * Выполняет полнотекстовый поиск по открытым лотам c пагинацией
+ *
  * @param mysqli $link Ресурс соединения
  * @param string $search Строка поискового запроса
  * @param int $pageItems Количество лотов на страницу
  * @param int $offset Смещение
  * @throws Exception Если произошла ошибка
- * @return array Список найденных лотов
+ * @return array Список найденных лотов или пустой массив
  */
 function findLotsBySearch(mysqli $link, string $search, int $pageItems, int $offset): array
 {
@@ -353,12 +363,21 @@ function findLotsBySearch(mysqli $link, string $search, int $pageItems, int $off
 
         return $result ? mysqli_fetch_all($result, MYSQLI_ASSOC) : [];
 
-    } catch (Exception $e) {
+    } catch (mysqli_sql_exception $e) {
         error_log('Ошибка поиска: ' . $e->getMessage());
         return [];
     }
 }
 
+/**
+ * Получает список активных лотов для категории с пагинацией
+ *
+ * @param mysqli $link Ресурс соединения
+ * @param int $category_id id категории
+ * @param int $limit Количество лотов на страницу
+ * @param int $offset Смещение
+ * @return array Список с данными лотов или пустой массив
+ */
 function findLotsByCategory(mysqli $link, int $category_id, int $limit, int $offset): array
 {
     $sql = 'SELECT
@@ -382,8 +401,71 @@ function findLotsByCategory(mysqli $link, int $category_id, int $limit, int $off
 
         return $result ? mysqli_fetch_all($result, MYSQLI_ASSOC) : [];
 
-    } catch (Exception $e) {
+    } catch (mysqli_sql_exception $e) {
         error_log('Ошибка получения лотов по категории: ' . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Добавляет в БД новую ставку
+ * @param mysqli $link Ресурс соединения
+ * @param int $cost Сумма ставки
+ * @param int $lotId id лота
+ * @param int userId id пользователя
+ * @param array $data Массив данных (сумма ставки, id лота, id пользователя)
+ * @return bool При успехе true, иначе false
+ */
+function addBid(mysqli $link, int $bid, int $lotId, int $userId): bool
+{
+    $sql = 'INSERT INTO bids(created_at, price, lot_id, user_id)
+            VALUES (NOW(), ?, ?, ?)';
+
+    $stmt = dbGetPrepareStmt($link, $sql, [
+        $bid,
+        $lotId,
+        $userId
+    ]);
+
+    try {
+        $result = mysqli_stmt_execute($stmt);
+        return $result;
+
+    } catch (mysqli_sql_exception $e) {
+        error_log('Ошибка БД при добавлении ставки' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Получает историю ставок для лота
+ * @param mysqli $link Ресурс соединения
+ * @param int $lotId id лота
+ * @return array Список ставок или пустой массив
+ */
+function getBidsByLot(mysqli $link, int $lotId): array
+{
+    $sql = 'SELECT
+            b.id AS bidId,
+            b.created_at,
+            b.price,
+            u.username AS userName,
+            u.id AS userId
+        FROM bids b
+        JOIN users u ON u.id = b.user_id
+        WHERE b.lot_id = ?
+        ORDER BY b.created_at DESC';
+
+    try {
+        $stmt = dbGetPrepareStmt($link, $sql, [$lotId]);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $bids = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+        return $bids ?: [];
+
+    } catch (mysqli_sql_exception $e) {
+        error_log("Ошибка при получении истории ставок для лота {$lotId}: " . $e->getMessage());
         return [];
     }
 }

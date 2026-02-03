@@ -19,7 +19,6 @@ $postData = $_POST;
 $fileData = $_FILES;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     $errors = validateLotForm($postData, $fileData);
 
     if (empty($errors)) {
@@ -30,12 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (move_uploaded_file($tmpName, __DIR__ . '/' . $filePath)) {
             $postData['lot-img'] = $filePath;
-
             $userId = $user['id'];
 
             try {
                 $id = addLot($db, $postData, $userId);
-                header("Location: /lot.php?id=$id");
+                header("Location: /lot.php?id={$id}");
                 exit();
 
             } catch (Exception $e) {

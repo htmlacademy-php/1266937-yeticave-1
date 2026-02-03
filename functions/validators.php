@@ -25,6 +25,7 @@ function isDateValid(string $date): bool
 
 /**
  * Проверяет, не превышает ли длина строки max значение
+ *
  * @param string $value Значение для проверки
  * @param int $min Минимально возможное количество символов
  * @param int $max Максимально возможное количество символов
@@ -44,6 +45,7 @@ function validateLength(string $value, int $min, int $max): string|null
 
 /**
  * Проверяет, является ли число целым и больше нуля
+ *
  * @param string $value Значение для проверки
  * @return string|null Текст ошибки или null
  */
@@ -62,6 +64,7 @@ function validatePositiveInteger(string $value): string|null
 
 /**
  * Проверяет дату на соответствие формату «ГГГГ-ММ-ДД», дата должна быть больше текущей хотя бы на один день
+ *
  * @param string $value Значение для проверки
  * @return string|null Текст ошибки или null
  */
@@ -85,6 +88,7 @@ function validateDate(string $value): string|null
 
 /**
  * Проверяет MIME-тип загруженного файла
+ *
  * @param array $file Элемент массива $_FILES для загруженного файла
  * @param array $fileTypes Допустимые форматы изображения
  * @return string|null Текст ошибки или null
@@ -103,10 +107,9 @@ function validateImage(array $file, array $fileTypes): string|null
 
 }
 
-// str_replace('image/', '', implode(', ', $fileTypes))
-
 /**
  * Валидирует данные формы добавления лота
+ *
  * @param array $postData Данные из массива $_POST
  * @param array $fileData Данные из массива $_FILES
  * @return string[] Список ошибок
@@ -190,6 +193,7 @@ function validateLotForm(array $postData, array $fileData): array
 
 /**
  * Валидирует формат электронной почты
+ *
  * @param string $value Адрес электронной почты
  * @return string|null Текст ошибки или null
  */
@@ -204,6 +208,7 @@ function validateEmailFormat(string $value): string|null
 
 /**
  * Валидирует данные формы регистрации
+ *
  * @param array $postData Данные из массива $_POST
  * @return string[] Список ошибок
  */
@@ -260,6 +265,7 @@ function validateSignUpForm(array $postData): array
 
 /**
  * Проверяет, не используется ли email другим пользователем
+ *
  * @param mysqli $link Ресурс соединения
  * @param string $email Email, введенный пользователем
  * @return string|null Текст ошибки или null
@@ -280,6 +286,7 @@ function validateEmailUnique(mysqli $link, string $email): string|null
 
 /**
  * Валидирует данные формы входа
+ *
  * @param array $postData Данные из массива $_POST
  * @return string[] Список ошибок
  */
@@ -298,5 +305,46 @@ function validateLoginForm(array $postData): array
         }
     }
 
-    return $errors;
+    return array_filter($errors);
+}
+
+/**
+ * Валидирует данные формы добавления ставки
+ *
+ * @param array $postData Данные из массива $_POST
+ * @param int $price Сумма ставки
+ * @param int $step Шаг ставки
+ * @return string[] Список ошибок
+ */
+function validateAddBidForm(array $postData, int $price, int $step): array
+{
+    $rules = [
+        'cost' => [
+            'message' => 'Введите вашу ставку',
+            'rule' => function ($value) use ($price, $step): string|null {
+                $minBid = $price + $step;
+                return validatePositiveInteger($value)
+                    ?: ((int) $value < $minBid ? 'Мин. ставка ' . $minBid : null);
+            }
+        ]
+    ];
+
+    $errors = [];
+
+    foreach ($rules as $key => $rule) {
+        $value = $postData[$key] ?? '';
+
+        if ($value === '') {
+            $errors[$key] = $rule['message'];
+        }
+
+        if (empty($errors[$key]) && isset($rule['rule'])) {
+            $ruleError = $rule['rule']($value);
+            if ($ruleError) {
+                $errors[$key] = $ruleError;
+            }
+        }
+    }
+
+    return array_filter($errors);
 }
