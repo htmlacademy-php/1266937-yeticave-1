@@ -28,7 +28,7 @@ INSERT INTO lots (
     description,
     img_url,
     price,
-    expiry_at,
+    expire_at,
     step,
     creator_id,
     category_id
@@ -132,7 +132,7 @@ SELECT l.title AS lot_title,
 FROM lots l
   JOIN categories c ON l.category_id = c.id
   LEFT JOIN bids b ON l.id = b.lot_id
-WHERE l.expiry_at > NOW()
+WHERE l.expire_at > NOW()
 GROUP BY l.id
 ORDER BY max_price DESC
 LIMIT 6;

@@ -1,23 +1,16 @@
 <?php
 
 /**
- * var array $categories
- * var array $errors
- * var array $postData
+ * @ var array $categories
+ * @ var array $errors
+ * @ var array $postData
+ * @ var string $navContent
  */
 
 ?>
 
 <main>
-    <nav class="nav">
-        <ul class="nav__list container">
-            <?php foreach ($categories as $category): ?>
-                <li class="nav__item">
-                    <a href="all-lots.html"><?= $category['title']; ?></a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </nav>
+    <?= $nav; ?>
     <form class="form form--add-lot container <?= !empty($errors) ? 'form--invalid' : '' ?>" action="add.php"
         method="post" enctype="multipart/form-data">
         <h2>Добавление лота</h2>

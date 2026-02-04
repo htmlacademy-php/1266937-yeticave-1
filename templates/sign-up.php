@@ -1,36 +1,16 @@
 <?php
 
 /**
- * var array $categories
- * var array $errors
- * var array $postData
+ * @var array $categories
+ * @var array $errors
+ * @var array $postData
+ * @var string $navContent
  */
 
 ?>
 
 <main>
-    <nav class="nav">
-        <ul class="nav__list container">
-            <li class="nav__item">
-                <a href="all-lots.html">Доски и лыжи</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Крепления</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Ботинки</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Одежда</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Инструменты</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Разное</a>
-            </li>
-        </ul>
-    </nav>
+    <?= $nav; ?>
     <form class="form container form--invalid <?= !empty($errors) ? 'form--invalid' : '' ?>" action="sign-up.php"
         method="post" autocomplete="off">
         <h2>Регистрация нового аккаунта</h2>

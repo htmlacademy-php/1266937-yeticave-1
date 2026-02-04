@@ -28,7 +28,7 @@ CREATE TABLE lots (
   description TEXT NOT NULL,
   img_url VARCHAR(2083) NOT NULL,
   price INT UNSIGNED NOT NULL,
-  expiry_at DATETIME NOT NULL,
+  expire_at DATETIME NOT NULL,
   step INT UNSIGNED NOT NULL,
   creator_id INT UNSIGNED NOT NULL,
   winner_id INT UNSIGNED NULL,

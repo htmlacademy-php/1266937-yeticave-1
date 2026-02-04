@@ -2,7 +2,7 @@
 
 $currentPage = max(1, (int) ($_GET['page'] ?? 1));
 
-$pagesCount = (int) ceil($lotsCount / $pageItems);
+$pagesCount = (int) ceil($itemsCount / $pageItems);
 $pagesCount = max(1, $pagesCount);
 
 if ($currentPage > $pagesCount) {

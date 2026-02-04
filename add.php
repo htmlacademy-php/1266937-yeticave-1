@@ -19,7 +19,6 @@ $postData = $_POST;
 $fileData = $_FILES;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     $errors = validateLotForm($postData, $fileData);
 
     if (empty($errors)) {
@@ -30,12 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (move_uploaded_file($tmpName, __DIR__ . '/' . $filePath)) {
             $postData['lot-img'] = $filePath;
-
             $userId = $user['id'];
 
             try {
                 $id = addLot($db, $postData, $userId);
-                header("Location: /lot.php?id=$id");
+                header("Location: /lot.php?id={$id}");
                 exit();
 
             } catch (Exception $e) {
@@ -47,10 +45,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$navContent = includeTemplate(
+    'nav.php',
+    [
+        'categories' => $categories
+    ]
+);
 
 $pageContent = includeTemplate(
     'add.php',
     [
+        'nav' => $navContent,
         'categories' => $categories,
         'errors' => $errors,
         'postData' => $postData
@@ -60,6 +65,7 @@ $pageContent = includeTemplate(
 $layoutContent = includeTemplate(
     'layout.php',
     [
+        'nav' => $navContent,
         'content' => $pageContent,
         'categories' => $categories,
         'user' => $user,

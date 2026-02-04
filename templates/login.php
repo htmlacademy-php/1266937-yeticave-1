@@ -1,36 +1,16 @@
 <?php
 
 /**
- * var array $categories
- * var array $errors
- * var array $postData
+ * @var array $categories
+ * @var array $errors
+ * @var array $postData
+ * @var string $navContent
  */
 
 ?>
 
 <main>
-    <nav class="nav">
-        <ul class="nav__list container">
-            <li class="nav__item">
-                <a href="all-lots.html">Доски и лыжи</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Крепления</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Ботинки</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Одежда</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Инструменты</a>
-            </li>
-            <li class="nav__item">
-                <a href="all-lots.html">Разное</a>
-            </li>
-        </ul>
-    </nav>
+    <?= $nav; ?>
     <form class="form container <?= !empty($errors) ? 'form--invalid' : '' ?>" action="/login.php" method="post">
         <h2>Вход</h2>
         <div class="form__item <?= isset($errors['email']) ? 'form__item--invalid' : '' ?>">
