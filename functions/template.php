@@ -2,8 +2,10 @@
 
 /**
  * Подключает шаблон, передает туда данные и возвращает итоговый HTML контент
+ *
  * @param string $name Путь к файлу шаблона относительно папки templates
  * @param array $data Ассоциативный массив с данными для шаблона
+ *
  * @return string Итоговый HTML
  */
 function includeTemplate(string $name, array $data = []): string
@@ -24,10 +26,12 @@ function includeTemplate(string $name, array $data = []): string
 
 /**
  * Показывает страницу ошибки
+ *
  * @param int $code Код ошибки
  * @param string $message Сообщение с описанием ошибки
  * @param array $user Данные пользователя
  * @param array $categories Список категорий
+ *
  * @return void
  */
 function showErrorPage(int $code, string $message, ?array $user, array $categories): void
@@ -112,8 +116,10 @@ function getNounPluralForm(int $number, string $one, string $two, string $many):
 
 /**
  * Форматирует цену в рублях с разделителями разрядов, опционально добавляет знак рубля
+ *
  * @param int $price Целое число
  * @param bool $withSymbol Со знаком рубля true, иначе false
+ *
  * @return string Отформатированная цена
  */
 function formatPrice(int $price, bool $withSymbol = true): string
@@ -127,6 +133,7 @@ function formatPrice(int $price, bool $withSymbol = true): string
  *  Возвращает количество целых часов и остатка минут до даты в будущем
  *
  * @param string $date Дата в формате ГГГГ-ММ-ДД
+ *
  * @return int[] Массив: первый элемент - целое количество часов до даты, второй - остаток в минутах
  */
 function getRemainingTime(string $date): array
@@ -153,7 +160,9 @@ function getRemainingTime(string $date): array
 
 /**
  * Форматирует время, оставшееся до даты в будущем
+ *
  * @param int[] $timeData Массив, в котором первый элемент - часы, второй - минуты
+ *
  * @return string Время в формате ЧЧ:ММ (с ведущими нулями)
  */
 function formatRemainingTime(array $timeData): string

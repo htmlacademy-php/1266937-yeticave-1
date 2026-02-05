@@ -9,11 +9,9 @@ require_once __DIR__ . '/init.php';
 
 $categories = getCategories($db);
 
-if ($user) {
-    if (!$user) {
-        showErrorPage(403, 'Доступ запрещен. Страница доступна только неавторизованным пользователям', $user, $categories);
-        exit();
-    }
+if (!empty($user)) {
+    showErrorPage(403, 'Доступ запрещен. Страница доступна только неавторизованным пользователям', $user, $categories);
+    exit();
 }
 
 $errors = [];

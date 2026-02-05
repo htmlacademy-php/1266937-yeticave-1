@@ -9,12 +9,12 @@ require_once __DIR__ . '/init.php';
 
 $categories = getCategories($db);
 
-if (!$user) {
+if (empty($user)) {
     showErrorPage(403, 'Доступ запрещен. Страница доступна только авторизованным пользователям', $user, $categories);
     exit();
 }
 
-$userId = $user['id'];
+$userId = $user['id'] ?? null;
 $userBids = getUserBids($db, $userId);
 
 $navContent = includeTemplate(

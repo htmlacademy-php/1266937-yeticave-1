@@ -58,6 +58,7 @@ function dbGetPrepareStmt(mysqli $link, string $sql, array $data = []): mysqli_s
  *
  * @param array $config_db Массив с ключами: hostname, username, password, database
  * @throws Exception При неудачной попытке подключения
+ *
  * @return mysqli Ресурс соединения
  */
 function connectDB(array $config_db): mysqli
@@ -85,6 +86,7 @@ function connectDB(array $config_db): mysqli
  *
  * @param mysqli $link Ресурс соединения
  * @throws mysqli_sql_exception Если ошибка в запросе
+ *
  * @return array Возвращает массив всех категорий или пустой массив при ошибке
  */
 function getCategories(mysqli $link): array
@@ -112,6 +114,7 @@ function getCategories(mysqli $link): array
  *
  * @param mysqli $link Ресурс соединения
  * @throws mysqli_sql_exception Если ошибка в запросе
+ *
  * @return array Возвращает массив лотов или пустой массив при ошибке
  */
 function getLots(mysqli $link): array
@@ -147,6 +150,7 @@ function getLots(mysqli $link): array
  * @param mysqli $link Ресурс соединения
  * @param int $id id лота
  * @throws mysqli_sql_exception Если ошибка в запросе
+ *
  * @return array Возвращает лот или null при ошибке
  */
 function getLotById(mysqli $link, int $id): ?array
@@ -184,13 +188,14 @@ function getLotById(mysqli $link, int $id): ?array
 }
 
 /**
- * Добавляет в базу данных новый лот
+ * Добавляет новый лот в базу данных
  *
- * @param mysqli $link Ресурс соединения
- * @param array $data Массив данных
- * @param int $userId
- * @throws Exception
- * @return int
+ * @param mysqli $link Ресурс соединения c базой данных
+ * @param array $data Массив данных из формы
+ * @param int $userId Id пользователя
+ * @throws Exception При ошибке запроса к базе данных
+ *
+ * @return int id добавленного лота
  */
 function addLot(mysqli $link, array $data, int $userId): int
 {
@@ -240,6 +245,7 @@ function addLot(mysqli $link, array $data, int $userId): int
  *
  * @param mysqli $link Ресурс соединения
  * @param array $data Массив данных
+ *
  * @return bool При успехе true, иначе false
  */
 function addNewUser(mysqli $link, array $data): bool
@@ -279,6 +285,7 @@ function addNewUser(mysqli $link, array $data): bool
  * @param string $email Email пользователя
  * @param string $password Пароль пользователя
  * @throws Exception Если произошла ошибка
+ *
  * @return array|null Данные пользователя в случае успеха, или null при ошибке
  */
 function authenticateUser(mysqli $link, string $email, string $password): array|null
@@ -319,8 +326,9 @@ function authenticateUser(mysqli $link, string $email, string $password): array|
  *
  * @param mysqli $link Ресурс соединения
  * @param string|null $search Строка поискового запроса, если есть
- * @param int|null $categoryId id категории, если есть
+ * @param int|null $categoryId Id категории, если есть
  * @throws Exception Если произошла ошибка
+ *
  * @return int Количество найденных лотов
  */
 function getItemsCount(mysqli $link, ?string $search = null, ?int $categoryId = null): int
@@ -367,6 +375,7 @@ function getItemsCount(mysqli $link, ?string $search = null, ?int $categoryId = 
  * @param int $pageItems Количество лотов на страницу
  * @param int $offset Смещение
  * @throws Exception Если произошла ошибка
+ *
  * @return array Список найденных лотов или пустой массив
  */
 function findLotsBySearch(mysqli $link, string $search, int $pageItems, int $offset): array
@@ -402,9 +411,10 @@ function findLotsBySearch(mysqli $link, string $search, int $pageItems, int $off
  * Получает список активных лотов для категории с пагинацией
  *
  * @param mysqli $link Ресурс соединения
- * @param int $category_id id категории
+ * @param int $category_id Id категории
  * @param int $limit Количество лотов на страницу
  * @param int $offset Смещение
+ *
  * @return array Список с данными лотов или пустой массив
  */
 function findLotsByCategory(mysqli $link, int $category_id, int $limit, int $offset): array
@@ -438,11 +448,13 @@ function findLotsByCategory(mysqli $link, int $category_id, int $limit, int $off
 
 /**
  * Добавляет в БД новую ставку
+ *
  * @param mysqli $link Ресурс соединения
  * @param int $cost Сумма ставки
- * @param int $lotId id лота
- * @param int userId id пользователя
+ * @param int $lotId Id лота
+ * @param int userId Id пользователя
  * @param array $data Массив данных (сумма ставки, id лота, id пользователя)
+ *
  * @return bool При успехе true, иначе false
  */
 function addBid(mysqli $link, int $bid, int $lotId, int $userId): bool
@@ -473,8 +485,10 @@ function addBid(mysqli $link, int $bid, int $lotId, int $userId): bool
 
 /**
  * Получает историю ставок для лота
+ *
  * @param mysqli $link Ресурс соединения
- * @param int $lotId id лота
+ * @param int $lotId Id лота
+ *
  * @return array Список ставок или пустой массив
  */
 function getLotBids(mysqli $link, int $lotId): array
@@ -506,8 +520,10 @@ function getLotBids(mysqli $link, int $lotId): array
 
 /**
  * Получает список ставок, сделанных пользователем
+ *
  * @param mysqli $link Ресурс соединения
- * @param int $userId id пользователя
+ * @param int $userId Id пользователя
+ *
  * @return array Список ставок или пустой массив
  */
 function getUserBids(mysqli $link, int $userId): array
@@ -560,7 +576,9 @@ function getUserBids(mysqli $link, int $userId): array
 /**
  * Получает список всех лотов без победителей, дата истечения которых меньше или равна текущей дате,
  * и находит для каждого такого лота последнюю (max) ставку
+ *
  * @param mysqli $link Ресурс соединения с базой данных
+ *
  * @return array Список лотов или пустой массив
  */
 function getExpiredLots(mysqli $link): array
@@ -571,7 +589,7 @@ function getExpiredLots(mysqli $link): array
                     l.title,
                     b.user_id,
                     u.email,
-                    u.username
+                    u.username AS winnerName
                 FROM lots l
                 LEFT JOIN bids b ON l.id = b.lot_id
                     AND b.price = (
@@ -597,23 +615,25 @@ function getExpiredLots(mysqli $link): array
 
 /**
  * Записывает в базу данных победителя для лота
+ *
  * @param mysqli $link Ресурс соединения с базой данных
- * @param int $lotId id лота
- * @param int $userId id победителя
+ * @param int $lotId Id лота
+ * @param int $userId Id победителя
+ *
  * @return bool В случае успешного обновления - true, иначе false
  */
 function setWinner(mysqli $link, int $userId, int $lotId): bool
 {
     try {
         $sql = 'UPDATE lots
-            SET winner_id = ?
-            WHERE id = ?';
+                SET winner_id = ?
+                WHERE id = ?';
 
         $stmt = dbGetPrepareStmt($link, $sql, [$userId, $lotId]);
         return mysqli_stmt_execute($stmt);
 
     } catch (mysqli_sql_exception $e) {
-        error_log('Ошибка при записи победителя в БД: ' . $e->getMessage());
+        error_log('Ошибка при записи победителя в базу данных: ' . $e->getMessage());
         return false;
     }
 }

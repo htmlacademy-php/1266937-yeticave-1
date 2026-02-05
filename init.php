@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/functions/template.php';
 require_once __DIR__ . '/functions/validators.php';
 require_once __DIR__ . '/functions/db.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 session_start();
 
