@@ -11,8 +11,8 @@
 
 <main>
     <?= $nav; ?>
-    <form class="form container form--invalid <?= !empty($errors) ? 'form--invalid' : '' ?>" action="sign-up.php"
-        method="post" autocomplete="off">
+    <form class="form container <?= !empty($errors) ? 'form--invalid' : '' ?>" action="sign-up.php" method="post"
+        autocomplete="off">
         <h2>Регистрация нового аккаунта</h2>
         <div class="form__item <?= isset($errors['email']) ? 'form__item--invalid' : '' ?>">
             <label for="email">E-mail <sup>*</sup></label>

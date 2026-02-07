@@ -11,11 +11,11 @@
         <?php
         foreach ($categories as $category): ?>
             <li class="nav__item">
-                <a href="/search.php?category=<?= htmlspecialchars($category['id']); ?>">
+                <a href="/search.php?id=<?= htmlspecialchars($category['id']); ?>">
                     <?= htmlspecialchars($category['title']); ?>
                 </a>
             </li>
-        <?php
+            <?php
         endforeach; ?>
     </ul>
 </nav>

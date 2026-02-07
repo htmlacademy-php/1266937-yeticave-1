@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/functions/template.php';
 require_once __DIR__ . '/functions/validators.php';
 require_once __DIR__ . '/functions/db.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 session_start();
 
@@ -18,6 +19,9 @@ $config = require_once __DIR__ . '/config.php';
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-$db = connectDB($config['db']);
+$db = connectDb($config['db']);
+
+date_default_timezone_set('Europe/Moscow');
+mysqli_query($db, "SET time_zone = '+03:00'");
 
 $user = $_SESSION['user'] ?? null;

@@ -7,6 +7,7 @@
  * @var array $user
  * @var array $errors
  * @var array $lotBids
+ * @var bool $showLotForm
  */
 
 ?>
@@ -14,32 +15,32 @@
 <main>
     <?= $nav; ?>
     <section class="lot-item container">
-        <h2><?= htmlspecialchars($lot['title']); ?></h2>
+        <h2><?= htmlspecialchars($lot['title'] ?? ''); ?></h2>
         <div class="lot-item__content">
             <div class="lot-item__left">
                 <div class="lot-item__image">
-                    <img src=<?= htmlspecialchars($lot['url']); ?> width="730" height="548"
-                        alt=<?= htmlspecialchars($lot['title']); ?>>
+                    <img src="<?= htmlspecialchars($lot['url'] ?? ''); ?>" width=" 730" height="548"
+                        alt="<?= htmlspecialchars($lot['title'] ?? ''); ?>">
                 </div>
                 <p class="lot-item__category">Категория:
                     <span>
-                        <?= htmlspecialchars($lot['category']); ?>
+                        <?= htmlspecialchars($lot['category'] ?? ''); ?>
                     </span>
                 </p>
-                <p class="lot-item__description"><?= htmlspecialchars($lot['description']); ?></p>
+                <p class="lot-item__description"><?= htmlspecialchars($lot['description'] ?? ''); ?></p>
             </div>
             <div class="lot-item__right">
                 <?php
-                if (!empty($user)): ?>
+                if ($showLotForm): ?>
                     <div class="lot-item__state">
-                        <?php [$hours, $minutes] = getRemainingTime($lot['expiry_date']); ?>
+                        <?php [$hours, $minutes] = getRemainingTime($lot['expiry_date'] ?? ''); ?>
                         <div class="lot-item__timer timer <?= $hours === 0 ? 'timer--finishing' : ''; ?>">
                             <?= formatRemainingTime([$hours, $minutes]) ?>
                         </div>
                         <div class="lot-item__cost-state">
                             <div class="lot-item__rate">
                                 <span class="lot-item__amount">Текущая цена</span>
-                                <span class="lot-item__cost"><?= formatPrice($lot['max_price'], false); ?></span>
+                                <span class="lot-item__cost"><?= formatPrice($lot['max_price'] ?? 0, false); ?></span>
                             </div>
                             <div class="lot-item__min-cost">
                                 Мин. ставка <span><?= formatPrice($minBid, false) ?> р</span>
@@ -64,9 +65,9 @@
                         <?php
                         foreach ($lotBids as $bid): ?>
                             <tr class="history__item">
-                                <td class="history__name"><?= htmlspecialchars($bid['username']); ?></td>
-                                <td class="history__price"><?= formatPrice($bid['price'], false) ?> р</td>
-                                <td class="history__time">5 минут назад</td>
+                                <td class="history__name"><?= htmlspecialchars($bid['username'] ?? ''); ?></td>
+                                <td class="history__price"><?= formatPrice($bid['price'] ?? '', false) ?> р</td>
+                                <td class="history__time"><?= getTimePassed($bid['created_at'] ?? ''); ?></td>
                             </tr>
                             <?php
                         endforeach; ?>

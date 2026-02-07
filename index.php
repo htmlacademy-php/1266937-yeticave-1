@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/getwinner.php';
 
 $categories = getCategories($db);
 $lots = getLots($db);
@@ -15,12 +16,17 @@ $navContent = includeTemplate(
     ['categories' => $categories]
 );
 
+$allLots = includeTemplate(
+    'all-lots.php',
+    ['lots' => $lots]
+);
+
 $pageContent = includeTemplate(
     'main.php',
     [
-        'nav' => $navContent,
         'categories' => $categories,
         'lots' => $lots,
+        'allLots' => $allLots
     ]
 );
 

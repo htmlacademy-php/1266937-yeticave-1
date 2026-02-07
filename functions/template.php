@@ -2,8 +2,10 @@
 
 /**
  * Подключает шаблон, передает туда данные и возвращает итоговый HTML контент
+ *
  * @param string $name Путь к файлу шаблона относительно папки templates
  * @param array $data Ассоциативный массив с данными для шаблона
+ *
  * @return string Итоговый HTML
  */
 function includeTemplate(string $name, array $data = []): string
@@ -24,10 +26,12 @@ function includeTemplate(string $name, array $data = []): string
 
 /**
  * Показывает страницу ошибки
+ *
  * @param int $code Код ошибки
  * @param string $message Сообщение с описанием ошибки
  * @param array $user Данные пользователя
  * @param array $categories Список категорий
+ *
  * @return void
  */
 function showErrorPage(int $code, string $message, ?array $user, array $categories): void
@@ -55,6 +59,7 @@ function showErrorPage(int $code, string $message, ?array $user, array $categori
             'content' => $mainContent,
             'user' => $user,
             'categories' => $categories,
+            'nav' => $navContent
         ]
     );
 
@@ -112,8 +117,10 @@ function getNounPluralForm(int $number, string $one, string $two, string $many):
 
 /**
  * Форматирует цену в рублях с разделителями разрядов, опционально добавляет знак рубля
+ *
  * @param int $price Целое число
  * @param bool $withSymbol Со знаком рубля true, иначе false
+ *
  * @return string Отформатированная цена
  */
 function formatPrice(int $price, bool $withSymbol = true): string
@@ -124,17 +131,18 @@ function formatPrice(int $price, bool $withSymbol = true): string
 }
 
 /**
- *  Возвращает количество целых часов и остатка минут до даты в будущем
+ * Возвращает количество целых часов и остатка минут до даты в будущем
  *
  * @param string $date Дата в формате ГГГГ-ММ-ДД
- * @return array Массив: первый элемент - целое количество часов до даты, второй - остаток в минутах
+ *
+ * @return int[] Массив: первый элемент - целое количество часов до даты, второй - остаток в минутах
  */
 function getRemainingTime(string $date): array
 {
     $expiryDate = date_create($date);
 
     if ($expiryDate === false) {
-        error_log('В функцию getRemainingTime передана некорректная дата' . $date);
+        error_log('В функцию getRemainingTime передана некорректная дата: ' . $date);
         return [0, 0];
     }
 
@@ -151,9 +159,97 @@ function getRemainingTime(string $date): array
     return [$hours, $minutes];
 }
 
+/**
+ * Форматирует время, оставшееся до даты в будущем
+ *
+ * @param int[] $timeData Массив, в котором первый элемент - часы, второй - минуты
+ *
+ * @return string Время в формате ЧЧ:ММ (с ведущими нулями)
+ */
 function formatRemainingTime(array $timeData): string
 {
     [$hours, $minutes] = $timeData;
 
     return sprintf("%02d:%02d", $hours, $minutes);
+}
+
+/**
+ * Показывает время, прошедшее с момента события, в человекочитаемом формате
+ *
+ * @param string $date Дата события в формате MySQL (YYYY-MM-DD HH:MM:SS)
+ *
+ * @return string Отформатированная строка ('меньше минуты назад', 'n минут назад', 'n часов назад',
+ *                или дата, если прошло больше суток)
+ */
+function getTimePassed(string $date): string
+{
+    $createdDate = date_create($date);
+
+    if ($createdDate === false) {
+        error_log('В функцию getTimePassed передана некорректная дата: ' . $date);
+        return ' ';
+    }
+
+    $currentDate = date_create();
+
+    $interval = date_diff($currentDate, $createdDate);
+
+    $hours = ($interval->days * 24) + $interval->h;
+    $minutes = $interval->i;
+
+    if ($hours === 0 && $minutes === 0) {
+        return 'меньше минуты назад';
+    }
+
+    if ($hours === 0) {
+        return $minutes . ' ' . getNounPluralForm($minutes, 'минуту', 'минуты', 'минут') . ' назад';
+    }
+
+    if ($hours < 24) {
+        return $hours . ' ' . getNounPluralForm($hours, 'час', 'часа', 'часов') . ' назад';
+    }
+
+    return date_format($createdDate, 'd.m.y в H:i');
+}
+
+/**
+ * Формирует шаблон пагинации
+ *
+ * @param int $itemsCount Общее количество элементов для показа
+ * @param int $pageItems Количество элементов для показа на одной странице
+ *
+ * @return string Шаблон пагинации
+ */
+function getPaginationTemplate(int $itemsCount, int $pageItems): string
+{
+    $currentPage = max(1, (int) ($_GET['page'] ?? 1));
+
+    $pagesCount = (int) ceil($itemsCount / $pageItems);
+    $pagesCount = max(1, $pagesCount);
+
+    if ($currentPage > $pagesCount) {
+        $currentPage = $pagesCount;
+    }
+
+    $pages = range(1, $pagesCount);
+
+    $queryParams = $_GET;
+    unset($queryParams['page']);
+
+    $urlQuery = http_build_query($queryParams);
+    $urlQuery = $urlQuery ? $urlQuery . '&' : '';
+
+    $prevPage = ($currentPage > 1) ? $currentPage - 1 : null;
+    $nextPage = ($currentPage < $pagesCount) ? $currentPage + 1 : null;
+
+    $pagination = includeTemplate('pagination.php', [
+        'pagesCount' => $pagesCount,
+        'pages' => $pages,
+        'currentPage' => $currentPage,
+        'prevPage' => $prevPage,
+        'nextPage' => $nextPage,
+        'urlQuery' => $urlQuery
+    ]);
+
+    return $pagination;
 }

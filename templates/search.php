@@ -3,7 +3,7 @@
 /**
  * @var string $navContent
  * @var string $search
- * @var array $pagination
+ * @var string $pagination
  * @var array $lots
  * @var array $urlQuery
  */
@@ -15,19 +15,13 @@
     <div class="container">
         <section class="lots">
             <?php if (!empty($lots)): ?>
-
-                <?php if (!empty($search)): ?>
-                    <h2>Результаты поиска по запросу «<span><?= htmlspecialchars($search); ?></span>»</h2>
-                <?php elseif (!empty($categoryName)): ?>
-                    <h2>Все лоты в категории <span>«<?= htmlspecialchars($categoryName); ?>»</span></h2>
-                <?php endif; ?>
-
-                <?= includeTemplate('all-lots.php', ['lots' => $lots]); ?>
-
+                <h2><?= $title; ?></h2>
+                <?= $allLots; ?>
             <?php else: ?>
+                <h2><?= $title; ?></h2>
                 <p>Ничего не найдено по вашему запросу</p>
             <?php endif; ?>
         </section>
-        <?= includeTemplate('pagination.php', $pagination); ?>
+        <?= $pagination; ?>
     </div>
 </main>
