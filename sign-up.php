@@ -11,7 +11,6 @@ $categories = getCategories($db);
 
 if (!empty($user)) {
     showErrorPage(403, 'Доступ запрещен. Страница доступна только неавторизованным пользователям', $user, $categories);
-    exit();
 }
 
 $errors = [];

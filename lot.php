@@ -11,24 +11,31 @@ $categories = getCategories($db);
 $lotId = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$lotId || $lotId <= 0) {
-    http_response_code(404);
-    exit('Некорректный идентификатор лота');
+    showErrorPage(404, 'Некорректный идентификатор лота', $user, $categories);
 }
 
 $lot = getLotById($db, $lotId);
 
 if ($lot === null) {
-    http_response_code(404);
-    die("Лот не найден");
+    showErrorPage(404, 'Лот не найден', $user, $categories);
 }
 
 $lotBids = getLotBids($db, $lotId);
 
-$errors = [];
-$postData = $_POST;
 $currentPrice = $lot['max_price'] ?? $lot['price'];
 $step = $lot['step'];
 $minBid = $currentPrice + $step;
+
+$isAuth = ($user !== null);
+$isAuthor = ($isAuth && $user['id'] === $lot['creator_id']);
+$isExpired = strtotime($lot['expiry_date']) <= time();
+$lastBidUserId = !empty($lotBids) ? (int) $lotBids[0]['userId'] : null;
+$isLastBidder = ($isAuth && $user['id'] === $lastBidUserId);
+
+$showLotForm = $isAuth && !$isExpired && !$isAuthor && !$isLastBidder;
+
+$errors = [];
+$postData = $_POST;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($user)) {
     $errors = validateAddBidForm($postData, $currentPrice, $step);
@@ -61,7 +68,8 @@ $pageContent = includeTemplate(
         'minBid' => $minBid,
         'errors' => $errors,
         'postData' => $postData,
-        'lotBids' => $lotBids
+        'lotBids' => $lotBids,
+        'showLotForm' => $showLotForm
     ]
 );
 

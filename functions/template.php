@@ -176,9 +176,9 @@ function formatRemainingTime(array $timeData): string
 /**
  * Показывает время, прошедшее с момента события, в человекочитаемом формате
  *
- * @param string $date Дата события
+ * @param string $date Дата события в формате MySQL (YYYY-MM-DD HH:MM:SS)
  *
- * @return string Отформатированная строка (меньше минуты назад, n минут назад, n часов назад,
+ * @return string Отформатированная строка ('меньше минуты назад', 'n минут назад', 'n часов назад',
  *                или дата, если прошло больше суток)
  */
 function getTimePassed(string $date): string
@@ -210,4 +210,46 @@ function getTimePassed(string $date): string
     }
 
     return date_format($createdDate, 'd.m.y в H:i');
+}
+
+/**
+ * Формирует шаблон пагинации
+ *
+ * @param int $itemsCount Общее количество элементов для показа
+ * @param int $pageItems Количество элементов для показа на одной странице
+ *
+ * @return string Шаблон пагинации
+ */
+function getPaginationTemplate(int $itemsCount, int $pageItems): string
+{
+    $currentPage = max(1, (int) ($_GET['page'] ?? 1));
+
+    $pagesCount = (int) ceil($itemsCount / $pageItems);
+    $pagesCount = max(1, $pagesCount);
+
+    if ($currentPage > $pagesCount) {
+        $currentPage = $pagesCount;
+    }
+
+    $pages = range(1, $pagesCount);
+
+    $queryParams = $_GET;
+    unset($queryParams['page']);
+
+    $urlQuery = http_build_query($queryParams);
+    $urlQuery = $urlQuery ? $urlQuery . '&' : '';
+
+    $prevPage = ($currentPage > 1) ? $currentPage - 1 : null;
+    $nextPage = ($currentPage < $pagesCount) ? $currentPage + 1 : null;
+
+    $pagination = includeTemplate('pagination.php', [
+        'pagesCount' => $pagesCount,
+        'pages' => $pages,
+        'currentPage' => $currentPage,
+        'prevPage' => $prevPage,
+        'nextPage' => $nextPage,
+        'urlQuery' => $urlQuery
+    ]);
+
+    return $pagination;
 }

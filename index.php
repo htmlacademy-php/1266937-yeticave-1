@@ -16,11 +16,17 @@ $navContent = includeTemplate(
     ['categories' => $categories]
 );
 
+$allLots = includeTemplate(
+    'all-lots.php',
+    ['lots' => $lots]
+);
+
 $pageContent = includeTemplate(
     'main.php',
     [
         'categories' => $categories,
         'lots' => $lots,
+        'allLots' => $allLots
     ]
 );
 

@@ -119,19 +119,8 @@ function validateImage(array $file, array $fileTypes): string|null
  *
  * @return string[] Список ошибок
  */
-function validateLotForm(array $postData, array $fileData): array
+function validateAddLotForm(array $postData, array $fileData): array
 {
-    $requiredFields = [
-        'lot-name',
-        'message',
-        'lot-img',
-        'category',
-        'lot-rate',
-        'lot-date',
-        'lot-step'
-    ];
-
-    // Сообщения для обязательных полей
     $errorMessages = [
         'lot-name' => 'Введите наименование лота',
         'message' => 'Напишите описание лота',
@@ -165,14 +154,12 @@ function validateLotForm(array $postData, array $fileData): array
         }
     ];
 
-    // Если поле не заполнено
-    foreach ($requiredFields as $key) {
+    foreach ($errorMessages as $key => $message) {
         if (empty($postData[$key]) && $key !== 'lot-img') {
-            $errors[$key] = $errorMessages[$key];
+            $errors[$key] = $message;
         }
     }
 
-    // Если файл не загружен
     if (empty($fileData['lot-img']['name'])) {
         $errors['lot-img'] = $errorMessages['lot-img'];
     }
@@ -221,13 +208,6 @@ function validateEmailFormat(string $value): string|null
  */
 function validateSignUpForm(array $postData): array
 {
-    $requiredFields = [
-        'email',
-        'password',
-        'name',
-        'message'
-    ];
-
     $errorMessages = [
         'email' => 'Введите e-mail',
         'password' => 'Введите пароль',
@@ -252,9 +232,9 @@ function validateSignUpForm(array $postData): array
 
     $errors = [];
 
-    foreach ($requiredFields as $key) {
+    foreach ($errorMessages as $key => $message) {
         if (empty($postData[$key])) {
-            $errors[$key] = $errorMessages[$key];
+            $errors[$key] = $message;
         }
     }
 
@@ -328,28 +308,29 @@ function validateLoginForm(array $postData): array
  */
 function validateAddBidForm(array $postData, int $price, int $step): array
 {
+    $errorMessages = [
+        'cost' => 'Введите вашу ставку'
+    ];
+
     $rules = [
-        'cost' => [
-            'message' => 'Введите вашу ставку',
-            'rule' => function ($value) use ($price, $step): string|null {
-                $minBid = $price + $step;
-                return validatePositiveInteger($value)
-                    ?: ((int) $value < $minBid ? 'Мин. ставка ' . $minBid : null);
-            }
-        ]
+        'cost' => function ($value) use ($price, $step): string|null {
+            $minBid = $price + $step;
+            return validatePositiveInteger($value)
+                ?: ((int) $value < $minBid ? 'Мин. ставка ' . $minBid : null);
+        }
     ];
 
     $errors = [];
 
-    foreach ($rules as $key => $rule) {
-        $value = $postData[$key] ?? '';
-
-        if ($value === '') {
-            $errors[$key] = $rule['message'];
+    foreach ($errorMessages as $key => $message) {
+        if (empty($postData[$key])) {
+            $errors[$key] = $message;
         }
+    }
 
-        if (empty($errors[$key]) && isset($rule['rule'])) {
-            $ruleError = $rule['rule']($value);
+    foreach ($rules as $key => $rule) {
+        if (empty($errors[$key])) {
+            $ruleError = $rule($postData[$key]);
             if ($ruleError) {
                 $errors[$key] = $ruleError;
             }

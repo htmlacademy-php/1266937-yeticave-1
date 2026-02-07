@@ -168,6 +168,7 @@ function getLotById(mysqli $link, int $id): ?array
                     l.price,
                     l.expire_at AS expiry_date,
                     l.step,
+                    l.creator_id,
                     c.title AS category,
                     COALESCE(MAX(b.price), l.price) AS max_price
                 FROM lots l
@@ -301,7 +302,6 @@ function authenticateUser(mysqli $link, string $email, string $password): array|
 
     } catch (mysqli_sql_exception $e) {
         error_log("Ошибка аутентификации: " . $e->getMessage());
-        throw $e;
     }
 
     return null;

@@ -19,7 +19,7 @@ $postData = $_POST;
 $fileData = $_FILES;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $errors = validateLotForm($postData, $fileData);
+    $errors = validateAddLotForm($postData, $fileData);
 
     if (empty($errors)) {
         $tmpName = $fileData['lot-img']['tmp_name'];
