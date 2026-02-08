@@ -45,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $id = addLot($db, $lotData);
                 header("Location: /lot.php?id={$id}");
                 exit();
-
             } catch (Exception $e) {
                 $errors['db'] = 'Ошибка базы данных: ' . $e->getMessage();
             }

@@ -112,6 +112,47 @@ function validateImage(array $file, array $fileTypes): string|null
 }
 
 /**
+ * Валидирует форму на основе обязательных полей и набора правил
+ *
+ * @param array $postData Данные из массива $_POST
+ * @param array $requiredMessages Массив [поле => сообщение_об_ошибке]
+ * @param array $rules Массив [поле => анонимная_функция_проверки], опционально
+ * @param array $fileData Данные из массива $_FILES, опционально
+ *
+ * @return array Список ошибок
+ */
+function validateForm(array $postData, array $requiredMessages, array $rules = [], array $fileData = []): array
+{
+    $errors = [];
+
+    foreach ($fileData as $key => $file) {
+        if (!empty($file['name'])) {
+            $postData[$key] = $file;
+        }
+    }
+
+    foreach ($requiredMessages as $key => $message) {
+        $value = $postData[$key] ?? null;
+
+        $isEmpty = is_string($value) ? trim($value) === '' : empty($value);
+
+        if ($isEmpty) {
+            $errors[$key] = $message;
+        }
+    }
+
+    foreach ($rules as $key => $rule) {
+        if (empty($errors[$key]) && isset($postData[$key])) {
+            if ($ruleError = $rule($postData[$key])) {
+                $errors[$key] = $ruleError;
+            }
+        }
+    }
+
+    return $errors;
+}
+
+/**
  * Валидирует данные формы добавления лота
  *
  * @param array $postData Данные из массива $_POST
@@ -121,17 +162,15 @@ function validateImage(array $file, array $fileTypes): string|null
  */
 function validateAddLotForm(array $postData, array $fileData): array
 {
-    $errorMessages = [
+    $requiredMessages = [
         'lot-name' => 'Введите наименование лота',
         'message' => 'Напишите описание лота',
-        'lot-img' => 'Загрузите изображение',
         'category' => 'Выберите категорию',
         'lot-rate' => 'Введите начальную цену',
         'lot-date' => 'Введите дату завершения торгов',
-        'lot-step' => 'Введите шаг ставки'
+        'lot-step' => 'Введите шаг ставки',
+        'lot-img' => 'Загрузите изображение'
     ];
-
-    $errors = [];
 
     $rules = [
         'lot-name' => function ($value) {
@@ -154,33 +193,7 @@ function validateAddLotForm(array $postData, array $fileData): array
         }
     ];
 
-    foreach ($errorMessages as $key => $message) {
-        if (empty($postData[$key]) && $key !== 'lot-img') {
-            $errors[$key] = $message;
-        }
-    }
-
-    if (empty($fileData['lot-img']['name'])) {
-        $errors['lot-img'] = $errorMessages['lot-img'];
-    }
-
-    foreach ($rules as $key => $rule) {
-        if (empty($errors[$key])) {
-            if (isset($postData[$key])) {
-                $ruleError = $rule($postData[$key]);
-                if ($ruleError) {
-                    $errors[$key] = $ruleError;
-                }
-            } else if (isset($fileData[$key])) {
-                $ruleError = $rule($fileData[$key]);
-                if ($ruleError) {
-                    $errors[$key] = $ruleError;
-                }
-            }
-        }
-    }
-
-    return array_filter($errors);
+    return validateForm($postData, $requiredMessages, $rules, $fileData);
 }
 
 /**
@@ -208,7 +221,7 @@ function validateEmailFormat(string $value): string|null
  */
 function validateSignUpForm(array $postData): array
 {
-    $errorMessages = [
+    $requiredMessages = [
         'email' => 'Введите e-mail',
         'password' => 'Введите пароль',
         'name' => 'Введите имя',
@@ -230,24 +243,7 @@ function validateSignUpForm(array $postData): array
         },
     ];
 
-    $errors = [];
-
-    foreach ($errorMessages as $key => $message) {
-        if (empty($postData[$key])) {
-            $errors[$key] = $message;
-        }
-    }
-
-    foreach ($rules as $key => $rule) {
-        if (empty($errors[$key])) {
-            $ruleError = $rule($postData[$key]);
-            if ($ruleError) {
-                $errors[$key] = $ruleError;
-            }
-        }
-    }
-
-    return array_filter($errors);
+    return validateForm($postData, $requiredMessages, $rules);
 }
 
 /**
@@ -281,20 +277,12 @@ function validateEmailUnique(mysqli $link, string $email): string|null
  */
 function validateLoginForm(array $postData): array
 {
-    $errorMessages = [
+    $requiredMessages = [
         'email' => 'Введите e-mail',
         'password' => 'Введите пароль'
     ];
 
-    $errors = [];
-
-    foreach ($errorMessages as $key => $message) {
-        if (empty($postData[$key])) {
-            $errors[$key] = $message;
-        }
-    }
-
-    return array_filter($errors);
+    return validateForm($postData, $requiredMessages);
 }
 
 /**
@@ -308,7 +296,7 @@ function validateLoginForm(array $postData): array
  */
 function validateAddBidForm(array $postData, int $price, int $step): array
 {
-    $errorMessages = [
+    $requiredMessages = [
         'cost' => 'Введите вашу ставку'
     ];
 
@@ -320,22 +308,5 @@ function validateAddBidForm(array $postData, int $price, int $step): array
         }
     ];
 
-    $errors = [];
-
-    foreach ($errorMessages as $key => $message) {
-        if (empty($postData[$key])) {
-            $errors[$key] = $message;
-        }
-    }
-
-    foreach ($rules as $key => $rule) {
-        if (empty($errors[$key])) {
-            $ruleError = $rule($postData[$key]);
-            if ($ruleError) {
-                $errors[$key] = $ruleError;
-            }
-        }
-    }
-
-    return array_filter($errors);
+    return validateForm($postData, $requiredMessages, $rules);
 }
