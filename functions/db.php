@@ -27,16 +27,12 @@ function dbGetPrepareStmt(mysqli $link, string $sql, array $data = []): mysqli_s
 
             if (is_int($value)) {
                 $type = 'i';
-            } else if (is_string($value)) {
-                $type = 's';
-            } else if (is_double($value)) {
+            } elseif (is_double($value)) {
                 $type = 'd';
             }
 
-            if ($type) {
-                $types .= $type;
-                $stmt_data[] = $value;
-            }
+            $types .= $type;
+            $stmt_data[] = $value;
         }
 
         $values = array_merge([$stmt, $types], $stmt_data);
