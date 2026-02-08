@@ -32,7 +32,7 @@ $isExpired = strtotime($lot['expiry_date']) <= time();
 $lastBidUserId = !empty($lotBids) ? (int) $lotBids[0]['userId'] : null;
 $isLastBidder = ($isAuth && $user['id'] === $lastBidUserId);
 
-$showLotForm = $isAuth && !$isExpired && !$isAuthor && !$isLastBidder;
+$showAddBidForm = $isAuth && !$isExpired && !$isAuthor && !$isLastBidder;
 
 $errors = [];
 $postData = $_POST;
@@ -69,7 +69,7 @@ $pageContent = includeTemplate(
         'errors' => $errors,
         'postData' => $postData,
         'lotBids' => $lotBids,
-        'showLotForm' => $showLotForm
+        'showAddBidForm' => $showAddBidForm
     ]
 );
 

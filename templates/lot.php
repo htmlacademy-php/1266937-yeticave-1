@@ -45,7 +45,7 @@
                         </div>
                     </div>
                     <?php
-                    if ($showLotForm): ?>
+                    if ($showAddBidForm): ?>
                         <form class="lot-item__form" action="lot.php?id=<?= $lot['id'] ?>" method="post" autocomplete="off">
                             <p
                                 class="lot-item__form-item form__item <?= isset($errors['cost']) ? 'form__item--invalid' : '' ?>">
