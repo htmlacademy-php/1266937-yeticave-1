@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   email VARCHAR(255) NOT NULL,
   username VARCHAR(50) NOT NULL,
-  password_hash CHAR(60) NOT NULL,
+  password_hash CHAR(255) NOT NULL,
   contacts TEXT NOT NULL,
   UNIQUE INDEX idx_email (email)
 );
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS lots (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   title VARCHAR(80) NOT NULL,
   description TEXT NOT NULL,
-  img_url VARCHAR(2083) NOT NULL,
+  img_url VARCHAR(255) NOT NULL,
   price INT UNSIGNED NOT NULL,
   expire_at DATETIME NOT NULL,
   step INT UNSIGNED NOT NULL,
